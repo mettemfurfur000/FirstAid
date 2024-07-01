@@ -144,6 +144,8 @@ public class CommonUtils {
         try {
             return optionalDamageModel.orElseThrow(() -> new IllegalArgumentException("Player " + player.getName().getContents() + " is missing a damage model!"));
         } catch (IllegalArgumentException e) {
+            // This is a band-aid solution, as bug reports about this keep coming up and these are really hard to debug bugs
+            // I don't have the time to correctly debug this, so it seems like there is no other way right now
             if (FirstAidConfig.GENERAL.debug.get()) {
                 FirstAid.LOGGER.fatal("Mandatory damage model missing!", e);
                 throw e;
