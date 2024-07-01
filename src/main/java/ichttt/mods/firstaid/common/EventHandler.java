@@ -99,6 +99,7 @@ public class EventHandler {
         float amountToDamage = event.getAmount();
         Player player = (Player) entity;
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+        if (damageModel == null) return;
         DamageSource source = event.getSource();
 
         if (amountToDamage == Float.MAX_VALUE) {
@@ -167,7 +168,9 @@ public class EventHandler {
     public static void tickPlayers(TickEvent.PlayerTickEvent event) {
         if (event.phase == TickEvent.Phase.END && !event.player.getAbilities().invulnerable) {
             if (!event.player.isAlive()) return;
-            CommonUtils.getDamageModel(event.player).tick(event.player.level, event.player);
+            AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(event.player);
+            if (damageModel == null) return;
+            damageModel.tick(event.player.level, event.player);
             hitList.remove(event.player); //Damage should be done in the same tick as the hit was noted, otherwise we got a false-positive
         }
     }
@@ -176,8 +179,11 @@ public class EventHandler {
     public static void onSleepFinished(SleepFinishedTimeEvent event) {
         if (ModList.get().isLoaded("morpheus")) return;
         for (Player player : event.getWorld().players()) {
-            if (player.isSleepingLongEnough())
-                CommonUtils.getDamageModel(player).sleepHeal(player);
+            if (player.isSleepingLongEnough()) {
+                AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+                if (damageModel == null) return;
+                damageModel.sleepHeal(player);
+            }
         }
     }
 
@@ -261,8 +267,9 @@ public class EventHandler {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!event.getPlayer().level.isClientSide) {
-            FirstAid.LOGGER.debug("Sending damage model to " + event.getPlayer().getName());
+            FirstAid.LOGGER.debug("Sending damage model to {}", event.getPlayer().getName());
             AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(event.getPlayer());
+            if (damageModel == null) return;
             if (damageModel.hasTutorial)
                 CapProvider.tutorialDone.add(event.getPlayer().getName().getString());
             ServerPlayer playerMP = (ServerPlayer) event.getPlayer();
@@ -285,8 +292,11 @@ public class EventHandler {
     @SubscribeEvent
     public static void onDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
         Player player = event.getPlayer();
-        if (!player.level.isClientSide && player instanceof ServerPlayer) //Mojang seems to wipe all caps on teleport
-            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new MessageSyncDamageModel(CommonUtils.getDamageModel(player), true));
+        if (!player.level.isClientSide && player instanceof ServerPlayer) {
+            AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+            if (damageModel == null) return;
+            FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) player), new MessageSyncDamageModel(damageModel, true));
+        }
     }
 
     @SubscribeEvent
@@ -306,6 +316,7 @@ public class EventHandler {
         Player player = event.getPlayer();
         if (!event.isEndConquered() && !player.level.isClientSide && player instanceof ServerPlayer) {
             AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+            if (damageModel == null) return;
             damageModel.runScaleLogic(player);
             damageModel.forEach(damageablePart -> damageablePart.heal(damageablePart.getMaxHealth(), player, false));
             damageModel.scheduleResync();

@@ -19,6 +19,7 @@
 package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
@@ -73,7 +74,9 @@ public class MessageUpdatePart {
             NetworkEvent.Context ctx = supplier.get();
             CommonUtils.checkClient(ctx);
             ctx.enqueueWork(() -> {
-                AbstractDamageablePart damageablePart = CommonUtils.getDamageModel(Minecraft.getInstance().player).getFromEnum(EnumPlayerPart.VALUES[message.id]);
+                AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(Minecraft.getInstance().player);
+                if (damageModel == null) return;
+                AbstractDamageablePart damageablePart = damageModel.getFromEnum(EnumPlayerPart.VALUES[message.id]);
                 damageablePart.setMaxHealth(message.maxHealth);
                 damageablePart.setAbsorption(message.absorption);
                 damageablePart.currentHealth = message.currentHealth;

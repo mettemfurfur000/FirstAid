@@ -91,11 +91,13 @@ public class HealthDistribution {
 
     public static void distributeHealth(float health, Player player, boolean sendChanges) {
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+        if (damageModel == null) return;
         manageHealth(health, damageModel, player, sendChanges, true);
     }
 
     public static void addRandomHealth(float health, Player player, boolean sendChanges) {
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+        if (damageModel == null) return;
         manageHealth(health, damageModel, player, sendChanges, false);
     }
 }

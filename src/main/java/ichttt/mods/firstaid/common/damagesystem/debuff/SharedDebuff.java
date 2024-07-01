@@ -63,6 +63,7 @@ public class SharedDebuff implements IDebuff {
             return;
 
         AbstractPlayerDamageModel damageModel = player.getCapability(CapabilityExtendedHealthSystem.INSTANCE, null).orElseThrow(() -> new RuntimeException("Could not find damage model for " + player));
+        if (damageModel == null) return;
         float healthPerMax = 0;
         for (EnumPlayerPart part : parts) {
             AbstractDamageablePart damageablePart = damageModel.getFromEnum(part);

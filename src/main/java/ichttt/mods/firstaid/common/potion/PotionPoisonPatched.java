@@ -60,6 +60,7 @@ public class PotionPoisonPatched extends MobEffect {
                 entity.stopSleeping();
             Player player = (Player) entity;
             AbstractPlayerDamageModel playerDamageModel = CommonUtils.getDamageModel(player);
+            if (playerDamageModel == null) return;
             if (DamageDistribution.handleDamageTaken(RandomDamageDistribution.ANY_NOKILL, playerDamageModel, 1.0F, player, DamageSource.MAGIC, true, false) != 1.0F) {
                 try {
                     SoundEvent sound = (SoundEvent) getHurtSound.invoke(player, DamageSource.MAGIC);

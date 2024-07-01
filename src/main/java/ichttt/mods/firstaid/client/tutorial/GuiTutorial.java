@@ -79,7 +79,9 @@ public class GuiTutorial extends Screen {
             if (action.hasNext()) GuiTutorial.this.action.next();
             else {
                 FirstAid.NETWORKING.sendToServer(new MessageClientRequest(MessageClientRequest.Type.TUTORIAL_COMPLETE));
-                minecraft.setScreen(new GuiHealthScreen(CommonUtils.getDamageModel(minecraft.player)));
+                AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(minecraft.player);
+                if (damageModel == null) return;
+                minecraft.setScreen(new GuiHealthScreen(damageModel));
             }
         }));
         for (AbstractWidget button : parent.getButtons()) {

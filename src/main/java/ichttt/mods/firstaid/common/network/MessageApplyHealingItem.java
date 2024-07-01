@@ -62,6 +62,7 @@ public class MessageApplyHealingItem {
             ServerPlayer player = CommonUtils.checkServer(ctx);
             ctx.enqueueWork(() -> {
                 AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+                if (damageModel == null) return;
                 ItemStack stack = player.getItemInHand(message.hand);
                 Item item = stack.getItem();
                 AbstractPartHealer healer = FirstAidRegistryImpl.INSTANCE.getPartHealer(stack);

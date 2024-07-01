@@ -47,7 +47,8 @@ public class ItemMorphine extends Item {
     public ItemStack finishUsingItem(@Nonnull ItemStack stack, @Nonnull Level world, @Nonnull LivingEntity entityLiving) {
         if (CommonUtils.hasDamageModel(entityLiving)) {
             AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel((Player) entityLiving);
-            Objects.requireNonNull(damageModel).applyMorphine((Player) entityLiving);
+            if (damageModel == null) return stack;
+            damageModel.applyMorphine((Player) entityLiving);
         }
         stack.shrink(1);
         return stack;

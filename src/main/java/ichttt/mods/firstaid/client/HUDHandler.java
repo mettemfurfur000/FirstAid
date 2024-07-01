@@ -87,6 +87,7 @@ public class HUDHandler implements ResourceManagerReloadListener {
         mc.getProfiler().push("prepare");
 
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
+        if (damageModel == null) return;
         if (!FirstAid.isSynced) //Wait until we receive the remote model
             return;
 
