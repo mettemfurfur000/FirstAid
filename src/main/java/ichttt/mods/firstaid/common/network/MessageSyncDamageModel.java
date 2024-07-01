@@ -54,6 +54,7 @@ public class MessageSyncDamageModel {
             ctx.enqueueWork(() -> {
                 Minecraft mc = Minecraft.getInstance();
                 AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
+                if (damageModel == null) return;
                 if (message.scaleMaxHealth)
                     damageModel.runScaleLogic(mc.player);
                 damageModel.deserializeNBT(message.playerDamageModel);

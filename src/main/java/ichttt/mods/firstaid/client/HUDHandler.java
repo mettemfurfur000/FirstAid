@@ -71,10 +71,6 @@ public class HUDHandler implements ResourceManagerReloadListener, IGuiOverlay {
         }
     }
 
-    public int getMaxLength() {
-        return maxLength;
-    }
-
     @Override
     public void render(ForgeGui gui, GuiGraphics guiGraphics, float partialTick, int screenWidth, int screenHeight) {
         if (FirstAidConfig.CLIENT.overlayMode.get() == FirstAidConfig.Client.OverlayMode.OFF) return;
@@ -91,6 +87,7 @@ public class HUDHandler implements ResourceManagerReloadListener, IGuiOverlay {
         mc.getProfiler().push("prepare");
 
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
+        if (damageModel == null) return;
         if (!FirstAid.isSynced) //Wait until we receive the remote model
             return;
 

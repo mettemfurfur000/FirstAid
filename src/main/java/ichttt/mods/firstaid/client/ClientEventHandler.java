@@ -97,6 +97,7 @@ public class ClientEventHandler {
         if (ClientHooks.SHOW_WOUNDS.consumeClick()) {
             Minecraft mc = Minecraft.getInstance();
             AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
+            if (damageModel == null) return;
             if (!damageModel.hasTutorial) {
                 damageModel.hasTutorial = true;
                 CapProvider.tutorialDone.add(mc.player.getName().getString());

@@ -60,6 +60,7 @@ public class SharedDebuff implements IDebuff {
             return;
 
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+        if (damageModel == null) return;
         float healthFraction = 0;
         for (EnumPlayerPart part : parts) {
             AbstractDamageablePart damageablePart = damageModel.getFromEnum(part);

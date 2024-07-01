@@ -62,6 +62,7 @@ public class DebugDamageCommand {
         if (damage == 0F)
             throw TYPE.create();
         AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+        if (damageModel == null) return 0;
         if (part == null) {
             for (EnumPlayerPart aPart : EnumPlayerPart.VALUES) {
                 doDamage(aPart, damage, debuff, player, damageModel);

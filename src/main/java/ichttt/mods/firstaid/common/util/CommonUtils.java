@@ -134,9 +134,24 @@ public class CommonUtils {
         }
     }
 
-    @Nonnull
+    /**
+     * Returns the damage model if present.
+     * If absent, an exception is thrown in debug mode, otherwise null is returned.
+     */
+    @Nullable
     public static AbstractPlayerDamageModel getDamageModel(Player player) {
-        return getOptionalDamageModel(player).orElseThrow(() -> new IllegalArgumentException("Player " + player.getName().getContents() + " is missing a damage model!"));
+        LazyOptional<AbstractPlayerDamageModel> optionalDamageModel = getOptionalDamageModel(player);
+        try {
+            return optionalDamageModel.orElseThrow(() -> new IllegalArgumentException("Player " + player.getName().getContents() + " is missing a damage model!"));
+        } catch (IllegalArgumentException e) {
+            if (FirstAidConfig.GENERAL.debug.get()) {
+                FirstAid.LOGGER.fatal("Mandatory damage model missing!", e);
+                throw e;
+            } else {
+                FirstAid.LOGGER.error("Missing a damage model, skipping further processing!", e);
+                return null;
+            }
+        }
     }
 
     @Nonnull

@@ -18,6 +18,7 @@
 
 package ichttt.mods.firstaid.common.network;
 
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
@@ -45,7 +46,11 @@ public class MessageApplyAbsorption {
         public static void onMessage(MessageApplyAbsorption message, Supplier<NetworkEvent.Context> supplier) {
             NetworkEvent.Context ctx = supplier.get();
             CommonUtils.checkClient(ctx);
-            ctx.enqueueWork(() -> CommonUtils.getDamageModel(Minecraft.getInstance().player).setAbsorption(message.amount));
+            ctx.enqueueWork(() -> {
+                AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(Minecraft.getInstance().player);
+                if (damageModel == null) return;
+                damageModel.setAbsorption(message.amount);
+            });
         }
     }
 }

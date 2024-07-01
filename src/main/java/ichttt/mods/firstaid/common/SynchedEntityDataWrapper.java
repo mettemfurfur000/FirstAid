@@ -20,6 +20,7 @@ package ichttt.mods.firstaid.common;
 
 import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.damagesystem.distribution.DamageDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.HealthDistribution;
 import ichttt.mods.firstaid.common.damagesystem.distribution.RandomDamageDistributionAlgorithm;
@@ -57,8 +58,12 @@ public class SynchedEntityDataWrapper extends SynchedEntityData {
     @Override
     @Nonnull
     public <T> T get(@Nonnull EntityDataAccessor<T> key) {
-        if (key == Player.DATA_PLAYER_ABSORPTION_ID && player.isAlive())
-            parent.set(key, (T) CommonUtils.getDamageModel(player).getAbsorption());
+        if (key == Player.DATA_PLAYER_ABSORPTION_ID && player.isAlive()) {
+            AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+            if (damageModel != null) {
+                parent.set(key, (T) damageModel.getAbsorption());
+            }
+        }
         return parent.get(key);
     }
 
@@ -81,13 +86,19 @@ public class SynchedEntityDataWrapper extends SynchedEntityData {
                 if (playerMP.connection != null) //also fired when connecting, ignore(otherwise the net handler would crash)
                     FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> playerMP), new MessageApplyAbsorption(floatValue));
             }
-            CommonUtils.getDamageModel(player).setAbsorption(floatValue);
+            AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+            if (damageModel != null) {
+                damageModel.setAbsorption(floatValue);
+            }
         } else if (key == LivingEntity.DATA_HEALTH_ID) {
             // AVERT YOUR EYES - this code is barely readable and very hacky
             if (value instanceof Float && !player.level().isClientSide) {
                 float aFloat = (Float) value;
                 if (aFloat > player.getMaxHealth()) {
-                    CommonUtils.getDamageModel(player).forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
+                    AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+                    if (damageModel != null) {
+                        damageModel.forEach(damageablePart -> damageablePart.currentHealth = damageablePart.getMaxHealth());
+                    }
                 } else if (beingRevived) {
                     if (FirstAidConfig.GENERAL.debug.get())
                         CommonUtils.debugLogStacktrace("Completely ignoring setHealth!");
@@ -104,7 +115,10 @@ public class SynchedEntityDataWrapper extends SynchedEntityData {
                                 if (FirstAidConfig.GENERAL.debug.get()) {
                                     CommonUtils.debugLogStacktrace("DAMAGING: " + (-healed));
                                 }
-                                DamageDistribution.handleDamageTaken(RandomDamageDistributionAlgorithm.getDefault(), CommonUtils.getDamageModel(player), -healed, player, player.damageSources().magic(), true, true);
+                                AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+                                if (damageModel != null) {
+                                    DamageDistribution.handleDamageTaken(RandomDamageDistributionAlgorithm.getDefault(), damageModel, -healed, player, player.damageSources().magic(), true, true);
+                                }
                             } else {
                                 if (FirstAidConfig.GENERAL.debug.get()) {
                                     CommonUtils.debugLogStacktrace("HEALING: " + healed);

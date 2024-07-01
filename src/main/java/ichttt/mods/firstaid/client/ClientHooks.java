@@ -20,6 +20,7 @@ package ichttt.mods.firstaid.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.client.gui.GuiHealthScreen;
 import ichttt.mods.firstaid.client.util.EventCalendar;
 import ichttt.mods.firstaid.common.util.CommonUtils;
@@ -51,7 +52,9 @@ public class ClientHooks {
 
     public static void showGuiApplyHealth(InteractionHand activeHand) {
         Minecraft mc = Minecraft.getInstance();
-        GuiHealthScreen.INSTANCE = new GuiHealthScreen(CommonUtils.getDamageModel(mc.player), activeHand);
+        AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(mc.player);
+        if (damageModel == null) return;
+        GuiHealthScreen.INSTANCE = new GuiHealthScreen(damageModel, activeHand);
         mc.setScreen(GuiHealthScreen.INSTANCE);
     }
 

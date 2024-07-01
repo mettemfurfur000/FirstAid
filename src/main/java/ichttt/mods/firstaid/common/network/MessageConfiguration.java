@@ -59,6 +59,7 @@ public class MessageConfiguration {
             FirstAid.LOGGER.info(LoggingMarkers.NETWORK, "Received remote damage model");
             ctx.enqueueWork(() -> {
                 AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(Minecraft.getInstance().player);
+                if (damageModel == null) return;
                 damageModel.deserializeNBT(message.playerDamageModel);
                 if (damageModel.hasTutorial)
                     CapProvider.tutorialDone.add(Minecraft.getInstance().player.getName().getString());

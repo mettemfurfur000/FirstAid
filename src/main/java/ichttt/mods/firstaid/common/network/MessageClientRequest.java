@@ -19,6 +19,7 @@
 package ichttt.mods.firstaid.common.network;
 
 import ichttt.mods.firstaid.FirstAid;
+import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
 import ichttt.mods.firstaid.common.CapProvider;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.network.FriendlyByteBuf;
@@ -56,9 +57,15 @@ public class MessageClientRequest {
             ServerPlayer player = CommonUtils.checkServer(ctx);
             if (message.type == Type.TUTORIAL_COMPLETE) {
                 CapProvider.tutorialDone.add(player.getName().getString());
-                ctx.enqueueWork(() -> CommonUtils.getDamageModel(player).hasTutorial = true);
+                ctx.enqueueWork(() -> {
+                    AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+                    if (damageModel == null) return;
+                    damageModel.hasTutorial = true;
+                });
             } else if (message.type == Type.REQUEST_REFRESH) {
-                    FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessageSyncDamageModel(CommonUtils.getDamageModel(player), true));
+                AbstractPlayerDamageModel damageModel = CommonUtils.getDamageModel(player);
+                if (damageModel == null) return;
+                FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessageSyncDamageModel(damageModel, true));
             }
         }
     }
