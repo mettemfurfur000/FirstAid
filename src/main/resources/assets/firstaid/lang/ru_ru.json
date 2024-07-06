@@ -4,20 +4,6 @@
   "item.firstaid.plaster": "Пластырь",
   "item.firstaid.morphine": "Морфин",
 
-  "gui.head": "Голова",
-  "gui.left_arm": "Левая рука",
-  "gui.left_leg": "Левая нога",
-  "gui.left_foot": "Левая ступня",
-  "gui.body": "Тело",
-  "gui.right_arm": "Правая рука",
-  "gui.right_leg": "Правая нога",
-  "gui.right_foot": "Правая ступня",
-  "gui.apply_hint": "Выберите, где применить элемент",
-  "gui.morphine_left": "Действие морфина(%s left)",
-  "gui.active_item": "В настоящее время активен",
-  "gui.no_sleep_heal": "Сон не восстанавливает здоровье",
-  "gui.sleep_heal_amount": "Сон восстанавливает %s%% максимальное здоровье",
-
   "firstaid.tooltip.morphine": "Подавляет ухудшения здоровья для %s",
   "firstaid.tooltip.healer": "Востанавливает %s сердец,  %s на половину сердца",
 
@@ -90,6 +76,21 @@
 
   "subtitles.debuff.heartbeat": "Сердцебиение",
   "firstaid.gui.next_heal": "Следующее исцеление: %s секунд",
+  "effect.firstaid.morphine": "Морфин",
   "firstaid.specificarmor": " +%s Локальная броня",
-  "firstaid.specifictoughness": " +%s Локальная прочность брони"
+  "firstaid.specifictoughness": " +%s Локальная прочность брони",
+
+  "firstaid.gui.head": "Голова",
+  "firstaid.gui.left_arm": "Левая рука",
+  "firstaid.gui.left_leg": "Левая нога",
+  "firstaid.gui.left_foot": "Левая ступня",
+  "firstaid.gui.body": "Тело",
+  "firstaid.gui.right_arm": "Правая рука",
+  "firstaid.gui.right_leg": "Правая нога",
+  "firstaid.gui.right_foot": "Правая ступня",
+  "firstaid.gui.apply_hint": "Выберите, где применить элемент",
+  "firstaid.gui.morphine_left": "Действие морфина(осталось %s)",
+  "firstaid.gui.active_item": "В настоящее время активен",
+  "firstaid.gui.no_sleep_heal": "Сон не восстанавливает здоровье",
+  "firstaid.gui.sleep_heal_amount": "Сон восстанавливает %s%% максимальное здоровье"
 }
