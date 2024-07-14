@@ -70,6 +70,10 @@ public class DebugDamageCommand {
         } else {
             doDamage(part, damage, debuff, player, damageModel);
         }
+        if (damageModel.isDead(player)) {
+            player.sendSystemMessage(Component.translatable("death.attack.generic", player.getDisplayName()));
+            CommonUtils.killPlayer(damageModel, player, null);
+        }
 
         FirstAid.NETWORKING.send(PacketDistributor.PLAYER.with(() -> player), new MessageSyncDamageModel(damageModel, false));
         return 1;
@@ -80,10 +84,6 @@ public class DebugDamageCommand {
             DamageDistribution.handleDamageTaken(new DirectDamageDistributionAlgorithm(part, debuff), damageModel, damage, player, player.damageSources().fellOutOfWorld(), false, false);
         } else {
             damageModel.getFromEnum(part).heal(-damage, player, debuff);
-        }
-        if (damageModel.isDead(player)) {
-            player.sendSystemMessage(Component.translatable("death.attack.generic", player.getDisplayName()));
-            CommonUtils.killPlayer(damageModel, player, null);
         }
     }
 }

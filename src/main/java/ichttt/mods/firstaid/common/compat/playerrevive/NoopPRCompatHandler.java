@@ -24,7 +24,7 @@ import net.minecraft.world.entity.player.Player;
 public class NoopPRCompatHandler implements IPRCompatHandler {
 
     @Override
-    public boolean tryRevivePlayer(Player player, DamageSource source) {
+    public boolean tryKnockOutPlayer(Player player, DamageSource source) {
         return false;
     }
 

@@ -62,7 +62,7 @@ public class PRPresentCompatHandler implements IPRCompatHandler {
     }
 
     @Override
-    public boolean tryRevivePlayer(Player player, DamageSource source) {
+    public boolean tryKnockOutPlayer(Player player, DamageSource source) {
         IBleeding bleedingCap = getBleedingCapIfPossible(player);
         if (bleedingCap != null) {
             bleedingCap.knockOut(player, source);

@@ -103,10 +103,13 @@ public class CommonUtils {
             }
         }
         IPRCompatHandler handler = PRCompatManager.getHandler();
-        if (!handler.tryRevivePlayer(player, source))
-            wrapper.set_impl(Player.DATA_HEALTH_ID, 0F);
-        else
-            wrapper.toggleBeingRevived(true);
+        if (!handler.isBleeding(player)) {
+            if (handler.tryKnockOutPlayer(player, source)) {
+                wrapper.toggleBeingRevived(true);
+            } else {
+                wrapper.set_impl(Player.DATA_HEALTH_ID, 0F);
+            }
+        }
     }
 
     public static boolean isValidArmorSlot(EquipmentSlot slot) {

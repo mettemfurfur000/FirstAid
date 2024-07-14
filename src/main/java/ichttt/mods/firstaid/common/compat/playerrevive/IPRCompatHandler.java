@@ -29,7 +29,7 @@ public interface IPRCompatHandler {
      * @return True if the player can still be revived and should not be killed,
      * false if the health should be set to 0 and the player should be killed.
      */
-    boolean tryRevivePlayer(Player player, DamageSource source);
+    boolean tryKnockOutPlayer(Player player, DamageSource source);
 
     boolean isBleeding(Player player);
 }
