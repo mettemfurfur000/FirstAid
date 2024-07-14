@@ -25,8 +25,10 @@ import ichttt.mods.firstaid.FirstAid;
 import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPlayerDamageModel;
+import ichttt.mods.firstaid.common.util.LoggingMarkers;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 
 import java.util.Random;
 
@@ -85,8 +87,9 @@ public class PlayerModelRenderer {
             return 0;
         }
         float healthPercentage = part.currentHealth / maxHealth;
-        if (healthPercentage >= 1 || healthPercentage <= 0)
-            throw new RuntimeException(String.format("Calculated invalid health for part %s with current health %s and max health %d. Got value %s", part.part, part.currentHealth, maxHealth, healthPercentage));
+        if (healthPercentage >= 1 || healthPercentage <= 0) {
+            FirstAid.LOGGER.error("Calculated invalid health for part {} with current health {} and max health {}. Got value {}", part.part, part.currentHealth, maxHealth, healthPercentage);
+        }
         if (!fourColors && healthPercentage > 0.75F) {
             return 1;
         }
