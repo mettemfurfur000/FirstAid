@@ -19,6 +19,7 @@
 
 package ichttt.mods.firstaid.api.damagesystem;
 
+import ichttt.mods.firstaid.api.debuff.IDebuff;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
@@ -87,4 +88,6 @@ public abstract class AbstractDamageablePart implements INBTSerializable<Compoun
     public abstract void setMaxHealth(int maxHealth);
 
     public abstract int getMaxHealth();
+
+    public abstract void loadDebuffInfo(IDebuff[] debuffs);
 }

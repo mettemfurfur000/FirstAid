@@ -40,7 +40,7 @@ public class CapProvider implements ICapabilitySerializable<CompoundTag> {
     private final LazyOptional<AbstractPlayerDamageModel> optional;
 
     public CapProvider() {
-        this.optional = LazyOptional.of(PlayerDamageModel::create);
+        this.optional = LazyOptional.of(PlayerDamageModel::new);
     }
 
     @Nonnull

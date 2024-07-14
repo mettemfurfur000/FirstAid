@@ -73,7 +73,7 @@ public abstract class DamageDistribution implements IDamageDistributionAlgorithm
                 left = damageDistribution.distributeDamage(left, player, source, addStat);
             }
         }
-        PlayerDamageModel before = PlayerDamageModel.create();
+        PlayerDamageModel before = new PlayerDamageModel();
         before.deserializeNBT(beforeCache);
         if (MinecraftForge.EVENT_BUS.post(new FirstAidLivingDamageEvent(player, damageModel, before, source, left))) {
             damageModel.deserializeNBT(beforeCache); //restore prev state

@@ -34,6 +34,7 @@ import ichttt.mods.firstaid.common.compat.playerrevive.PRCompatManager;
 import ichttt.mods.firstaid.common.damagesystem.debuff.SharedDebuff;
 import ichttt.mods.firstaid.common.network.MessageSyncDamageModel;
 import ichttt.mods.firstaid.common.registries.FirstAidRegistryLookups;
+import ichttt.mods.firstaid.common.registries.LookupReloadListener;
 import ichttt.mods.firstaid.common.util.CommonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
@@ -50,7 +51,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class PlayerDamageModel extends AbstractPlayerDamageModel {
+public class PlayerDamageModel extends AbstractPlayerDamageModel implements LookupReloadListener {
     private final Set<SharedDebuff> sharedDebuffs = new HashSet<>();
     private int morphineTicksLeft = 0;
     private int sleepBlockTicks = 0;
@@ -60,28 +61,17 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
     private boolean needsMorphineUpdate = false;
     private int resyncTimer = -1;
 
-    public static PlayerDamageModel create() {
-        IDebuff[] headDebuffs = FirstAidRegistryLookups.getDebuffs(EnumDebuffSlot.HEAD);
-        IDebuff[] bodyDebuffs = FirstAidRegistryLookups.getDebuffs(EnumDebuffSlot.BODY);
-        IDebuff[] armsDebuffs = FirstAidRegistryLookups.getDebuffs(EnumDebuffSlot.ARMS);
-        IDebuff[] legFootDebuffs = FirstAidRegistryLookups.getDebuffs(EnumDebuffSlot.LEGS_AND_FEET);
-        return new PlayerDamageModel(headDebuffs, bodyDebuffs, armsDebuffs, legFootDebuffs);
-    }
-
-    protected PlayerDamageModel(IDebuff[] headDebuffs, IDebuff[] bodyDebuffs, IDebuff[] armDebuffs, IDebuff[] legFootDebuffs) {
-        super(new DamageablePart(FirstAidConfig.SERVER.maxHealthHead.get(),      FirstAidConfig.SERVER.causeDeathHead.get(),  EnumPlayerPart.HEAD,       headDebuffs   ),
-              new DamageablePart(FirstAidConfig.SERVER.maxHealthLeftArm.get(),   false,                         EnumPlayerPart.LEFT_ARM,   armDebuffs    ),
-              new DamageablePart(FirstAidConfig.SERVER.maxHealthLeftLeg.get(),   false,                         EnumPlayerPart.LEFT_LEG,   legFootDebuffs),
-              new DamageablePart(FirstAidConfig.SERVER.maxHealthLeftFoot.get(),  false,                         EnumPlayerPart.LEFT_FOOT,  legFootDebuffs),
-              new DamageablePart(FirstAidConfig.SERVER.maxHealthBody.get(),      FirstAidConfig.SERVER.causeDeathBody.get(),  EnumPlayerPart.BODY,       bodyDebuffs   ),
-              new DamageablePart(FirstAidConfig.SERVER.maxHealthRightArm.get(),  false,                         EnumPlayerPart.RIGHT_ARM,  armDebuffs    ),
-              new DamageablePart(FirstAidConfig.SERVER.maxHealthRightLeg.get(),  false,                         EnumPlayerPart.RIGHT_LEG,  legFootDebuffs),
-              new DamageablePart(FirstAidConfig.SERVER.maxHealthRightFoot.get(), false,                         EnumPlayerPart.RIGHT_FOOT, legFootDebuffs));
-        for (IDebuff debuff : armDebuffs)
-            this.sharedDebuffs.add((SharedDebuff) debuff);
-        for (IDebuff debuff : legFootDebuffs)
-            this.sharedDebuffs.add((SharedDebuff) debuff);
+    public PlayerDamageModel() {
+        super(new DamageablePart(FirstAidConfig.SERVER.maxHealthHead.get(),      FirstAidConfig.SERVER.causeDeathHead.get(),  EnumPlayerPart.HEAD),
+              new DamageablePart(FirstAidConfig.SERVER.maxHealthLeftArm.get(),   false,                         EnumPlayerPart.LEFT_ARM),
+              new DamageablePart(FirstAidConfig.SERVER.maxHealthLeftLeg.get(),   false,                         EnumPlayerPart.LEFT_LEG),
+              new DamageablePart(FirstAidConfig.SERVER.maxHealthLeftFoot.get(),  false,                         EnumPlayerPart.LEFT_FOOT),
+              new DamageablePart(FirstAidConfig.SERVER.maxHealthBody.get(),      FirstAidConfig.SERVER.causeDeathBody.get(),  EnumPlayerPart.BODY),
+              new DamageablePart(FirstAidConfig.SERVER.maxHealthRightArm.get(),  false,                         EnumPlayerPart.RIGHT_ARM),
+              new DamageablePart(FirstAidConfig.SERVER.maxHealthRightLeg.get(),  false,                         EnumPlayerPart.RIGHT_LEG),
+              new DamageablePart(FirstAidConfig.SERVER.maxHealthRightFoot.get(), false,                         EnumPlayerPart.RIGHT_FOOT));
         noCritical = !FirstAidConfig.SERVER.causeDeathBody.get() && !FirstAidConfig.SERVER.causeDeathHead.get();
+        FirstAidRegistryLookups.registerReloadListener(this);
     }
 
     @Override
@@ -109,12 +99,30 @@ public class PlayerDamageModel extends AbstractPlayerDamageModel {
         RIGHT_ARM.deserializeNBT((CompoundTag) nbt.get("rightArm"));
         RIGHT_LEG.deserializeNBT((CompoundTag) nbt.get("rightLeg"));
         RIGHT_FOOT.deserializeNBT((CompoundTag) nbt.get("rightFoot"));
-        if (nbt.contains("morphineTicks")) { //legacy - we still have to write it
+        if (nbt.contains("morphineTicks")) { //legacy - we still have to read it
             morphineTicksLeft = nbt.getInt("morphineTicks");
             needsMorphineUpdate = true;
         }
-        if (nbt.contains("hasTutorial"))
+        if (nbt.contains("hasTutorial")) {
             hasTutorial = nbt.getBoolean("hasTutorial");
+        }
+    }
+
+    @Override
+    public void onLookupsReloaded() {
+        FirstAid.LOGGER.debug("Reloaded lookups");
+        sharedDebuffs.clear();
+        for (EnumDebuffSlot debuffSlot : EnumDebuffSlot.values()) {
+            IDebuff[] debuffs = FirstAidRegistryLookups.getDebuffs(debuffSlot);
+            for (EnumPlayerPart playerPart : debuffSlot.playerParts) {
+                getFromEnum(playerPart).loadDebuffInfo(debuffs);
+            }
+            for (IDebuff debuff : debuffs) {
+                if (debuff instanceof SharedDebuff sharedDebuff) {
+                    sharedDebuffs.add(sharedDebuff);
+                }
+            }
+        }
     }
 
     @Override

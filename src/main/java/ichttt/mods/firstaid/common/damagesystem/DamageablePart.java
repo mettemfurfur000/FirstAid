@@ -23,8 +23,10 @@ import ichttt.mods.firstaid.FirstAidConfig;
 import ichttt.mods.firstaid.api.damagesystem.AbstractDamageablePart;
 import ichttt.mods.firstaid.api.damagesystem.AbstractPartHealer;
 import ichttt.mods.firstaid.api.debuff.IDebuff;
+import ichttt.mods.firstaid.api.enums.EnumDebuffSlot;
 import ichttt.mods.firstaid.api.enums.EnumPlayerPart;
 import ichttt.mods.firstaid.api.healing.ItemHealing;
+import ichttt.mods.firstaid.common.registries.FirstAidRegistryLookups;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -39,14 +41,18 @@ import java.util.Objects;
 
 public class DamageablePart extends AbstractDamageablePart {
     private int maxHealth;
-    @Nonnull
-    private final IDebuff[] debuffs;
+    @Nullable
+    private IDebuff[] debuffs;
     private float absorption;
 
-    public DamageablePart(int maxHealth, boolean canCauseDeath, @Nonnull EnumPlayerPart playerPart, @Nonnull IDebuff... debuffs) {
+    public DamageablePart(int maxHealth, boolean canCauseDeath, @Nonnull EnumPlayerPart playerPart) {
         super(maxHealth, canCauseDeath, playerPart);
         this.maxHealth = maxHealth;
         this.currentHealth = maxHealth;
+    }
+
+    @Override
+    public void loadDebuffInfo(IDebuff[] debuffs) {
         this.debuffs = debuffs;
     }
 
@@ -62,9 +68,11 @@ public class DamageablePart extends AbstractDamageablePart {
             notFitting = notFitting - (currentHealth - oldHealth);
         }
         final float finalNotFitting = notFitting;
-        if (applyDebuff) {
+        if (applyDebuff && debuffs != null) {
             Objects.requireNonNull(player, "Got null player with applyDebuff = true");
-            Arrays.stream(debuffs).forEach(debuff -> debuff.handleHealing(amount - finalNotFitting, currentHealth / maxHealth, (ServerPlayer) player));
+            for (IDebuff debuff : debuffs) {
+                debuff.handleHealing(amount - finalNotFitting, currentHealth / maxHealth, (ServerPlayer) player);
+            }
         }
         return notFitting;
     }
@@ -87,9 +95,11 @@ public class DamageablePart extends AbstractDamageablePart {
         }
         float notFitting = Math.abs(Math.min(minHealth, currentHealth - amount) - minHealth);
         currentHealth = Math.max(minHealth, currentHealth - amount);
-        if (applyDebuff) {
+        if (applyDebuff && debuffs != null) {
             Objects.requireNonNull(player, "Got null player with applyDebuff = true");
-            Arrays.stream(debuffs).forEach(debuff -> debuff.handleDamageTaken(origAmount - notFitting, currentHealth / maxHealth, (ServerPlayer) player));
+            for (IDebuff debuff : debuffs) {
+                debuff.handleDamageTaken(origAmount - notFitting, currentHealth / maxHealth, (ServerPlayer) player);
+            }
         }
         return notFitting;
     }
@@ -103,8 +113,11 @@ public class DamageablePart extends AbstractDamageablePart {
             if (activeHealer.hasFinished())
                 activeHealer = null;
         }
-        if (!world.isClientSide && tickDebuffs)
-            Arrays.stream(debuffs).forEach(debuff -> debuff.update(player, currentHealth / maxHealth));
+        if (!world.isClientSide && tickDebuffs && debuffs != null) {
+            for (IDebuff debuff : debuffs) {
+                debuff.update(player, currentHealth / maxHealth);
+            }
+        }
     }
 
     @Override
@@ -149,7 +162,11 @@ public class DamageablePart extends AbstractDamageablePart {
         if (nbt.contains("absorption"))
             absorption = nbt.getFloat("absorption");
         //kick constant debuffs active
-        Arrays.stream(debuffs).forEach(debuff -> debuff.handleHealing(0F, currentHealth / maxHealth, null));
+        if (debuffs != null) {
+            for (IDebuff debuff : debuffs) {
+                debuff.handleHealing(0F, currentHealth / maxHealth, null);
+            }
+        }
     }
 
     @Override

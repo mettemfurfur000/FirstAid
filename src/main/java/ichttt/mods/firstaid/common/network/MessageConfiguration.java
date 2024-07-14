@@ -67,6 +67,7 @@ public class MessageConfiguration {
                     Minecraft.getInstance().player.sendSystemMessage(Component.literal("[First Aid] " + I18n.get("firstaid.tutorial.hint", ClientHooks.SHOW_WOUNDS.getTranslatedKeyMessage().getString())));
                 HUDHandler.INSTANCE.ticker = 200;
                 FirstAid.isSynced = true;
+                FirstAid.LOGGER.debug(LoggingMarkers.NETWORK, "Sync complete");
             });
         }
     }

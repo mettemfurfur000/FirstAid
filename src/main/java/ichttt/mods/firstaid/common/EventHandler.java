@@ -284,7 +284,7 @@ public class EventHandler {
     @SubscribeEvent
     public static void tagsUpdated(TagsUpdatedEvent event) {
         if (event.shouldUpdateStaticData()) {
-            FirstAidRegistryLookups.init(event.getRegistryAccess());
+            FirstAidRegistryLookups.init(event.getRegistryAccess(), event.getUpdateCause() == TagsUpdatedEvent.UpdateCause.CLIENT_PACKET_RECEIVED);
         }
     }
 

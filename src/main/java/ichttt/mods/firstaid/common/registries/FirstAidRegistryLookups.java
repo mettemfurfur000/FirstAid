@@ -36,6 +36,8 @@ import net.minecraft.world.damagesource.DamageType;
 import java.util.*;
 
 public class FirstAidRegistryLookups {
+    private static final Object LOCK = new Object();
+    private static final Collection<LookupReloadListener> LISTENERS = Collections.newSetFromMap(new WeakHashMap<>());
     private static Map<DamageType, IDamageDistributionAlgorithm> DAMAGE_DISTRIBUTIONS;
     private static Map<EnumDebuffSlot, List<IDebuffBuilder>> DEBUFF_BUILDERS;
 
@@ -55,10 +57,19 @@ public class FirstAidRegistryLookups {
         return list.toArray(new IDebuff[0]);
     }
 
-    public static void init(RegistryAccess registryAccess) {
-        DAMAGE_DISTRIBUTIONS = buildDamageDistributions(registryAccess);
-        DEBUFF_BUILDERS = buildDebuffs(registryAccess);
-        FirstAid.LOGGER.info(LoggingMarkers.REGISTRY, "Built FirstAid registry lookups");
+    public static void init(RegistryAccess registryAccess, boolean isRemote) {
+        if (isRemote && FirstAid.isSynced) {
+            throw new IllegalStateException("Synced before registry lookups have been loaded!");
+        }
+
+        synchronized (LOCK) {
+            DAMAGE_DISTRIBUTIONS = buildDamageDistributions(registryAccess);
+            DEBUFF_BUILDERS = buildDebuffs(registryAccess);
+            for (LookupReloadListener listener : LISTENERS) {
+                listener.onLookupsReloaded();
+            }
+        }
+        FirstAid.LOGGER.info(LoggingMarkers.REGISTRY, "Built {} FirstAid registry lookups", isRemote ? "remote" : "local");
     }
 
     private static Map<DamageType, IDamageDistributionAlgorithm> buildDamageDistributions(RegistryAccess registryAccess) {
@@ -96,7 +107,6 @@ public class FirstAidRegistryLookups {
 
         EnumMap<EnumDebuffSlot, List<IDebuffBuilder>> debuffMap = new EnumMap<>(EnumDebuffSlot.class);
         for (Map.Entry<ResourceKey<IDebuffBuilder>, IDebuffBuilder> entry : debuffBuilderRegistry.entrySet()) {
-            ResourceKey<IDebuffBuilder> key = entry.getKey();
             IDebuffBuilder debuffBuilder = entry.getValue();
             debuffMap.computeIfAbsent(debuffBuilder.affectedSlot(), slot -> new ArrayList<>()).add(debuffBuilder);
         }
@@ -106,5 +116,16 @@ public class FirstAidRegistryLookups {
     public static void reset() {
         DAMAGE_DISTRIBUTIONS = null;
         DEBUFF_BUILDERS = null;
+        LISTENERS.clear();
+    }
+
+    public static void registerReloadListener(LookupReloadListener reloadListener) {
+        Objects.requireNonNull(reloadListener);
+        synchronized (LOCK) {
+            LISTENERS.add(reloadListener);
+            if (DAMAGE_DISTRIBUTIONS != null) {
+                reloadListener.onLookupsReloaded();
+            }
+        }
     }
 }

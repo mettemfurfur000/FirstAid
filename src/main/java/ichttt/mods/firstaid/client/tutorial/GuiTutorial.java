@@ -44,7 +44,7 @@ public class GuiTutorial extends Screen {
     @SuppressWarnings("deprecation") // we still need this method
     public GuiTutorial() {
         super(Component.translatable("firstaid.tutorial"));
-        this.demoModel = PlayerDamageModel.create();
+        this.demoModel = new PlayerDamageModel();
         this.parent = new GuiHealthScreen(demoModel);
         this.action = new TutorialAction(this);
 
