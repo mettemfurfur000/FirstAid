@@ -129,6 +129,8 @@ public class ClientEventHandler {
         Entity entity = event.getEntity();
         if (entity instanceof Player) {
             EntityRenderDispatcher renderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+            if(!renderDispatcher.options.renderDebug)
+                return;
             if (renderDispatcher.shouldRenderHitBoxes()) {
                 PoseStack poseStack = event.getPoseStack();
                 poseStack.pushPose();
